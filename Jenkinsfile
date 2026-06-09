@@ -27,11 +27,17 @@ pipeline {
             steps {
                 sh '''
                     sudo docker start dbe5bbc71ca4 || true
-                    sleep 10
+                    sleep 15
+                    mkdir -p /tmp/zap-reports
                     sudo docker run --rm \
+                        --network host \
+                        -v /tmp/zap-reports:/zap/wrk \
                         ghcr.io/zaproxy/zaproxy:stable \
-                        zap-baseline.py -t http://192.168.59.128:3000 \
-                        -r zap_report.html || true
+                        zap-baseline.py \
+                        -t http://127.0.0.1:3000 \
+                        -r zap_report.html \
+                        -I || true
+                    ls -lh /tmp/zap-reports/
                 '''
             }
         }
