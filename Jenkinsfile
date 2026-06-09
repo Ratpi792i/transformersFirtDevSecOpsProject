@@ -15,11 +15,20 @@ pipeline {
         stage('DAST ZAP') {
             steps {
                 sh '''
-                    sudo docker start dbe5bbc71ca4 || true
-                    sleep 15
+                    pip3 install flask || true
+                    python3 app.py &
+                    sleep 10
                     mkdir -p /tmp/zap-reports
-                    sudo docker run --rm --network host -v /tmp/zap-reports:/zap/wrk ghcr.io/zaproxy/zaproxy:stable zap-baseline.py -t http://127.0.0.1:3000 -r zap_report.html -I || true
+                    sudo docker run --rm \
+                        --network host \
+                        -v /tmp/zap-reports:/zap/wrk \
+                        ghcr.io/zaproxy/zaproxy:stable \
+                        zap-baseline.py \
+                        -t http://127.0.0.1:5000 \
+                        -r zap_report.html \
+                        -I || true
                     ls -lh /tmp/zap-reports/
+                    pkill -f "python3 app.py" || true
                 '''
             }
         }
