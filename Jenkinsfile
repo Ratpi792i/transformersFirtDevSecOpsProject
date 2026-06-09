@@ -16,12 +16,14 @@ pipeline {
             steps {
                 sh '''
                     pip3 install flask || true
+                    pkill -f "python3 app.py" || true
                     python3 app.py &
                     sleep 10
-                    mkdir -p /tmp/zap-reports
+                    sudo mkdir -p /tmp/zap-reports
+                    sudo chmod 777 /tmp/zap-reports
                     sudo docker run --rm \
                         --network host \
-                        -v /tmp/zap-reports:/zap/wrk \
+                        -v /tmp/zap-reports:/zap/wrk/:rw \
                         ghcr.io/zaproxy/zaproxy:stable \
                         zap-baseline.py \
                         -t http://127.0.0.1:5000 \
